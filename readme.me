@@ -1,0 +1,150 @@
+1. Explica métodos para 'abrir' unha consola/shell a un contenedor en execución.
+
+docker exec -it "ID/nombre_contenedor" bash 
+
+Permite la ejecucion de comandos de la terminal /bin/bash en contenedores activos 
+
+
+docker attach -it "ID/nombre contenedor" 
+
+
+2. No contenedor anterior (en execución), qué opciones tes que ter usado ó arrincalo para poder interactuar coas súas entradas e salidas
+
+
+se le debe añadir el parametro -it 
+
+-i ; es el encargado de hacer que el contenedor se mantenga interactivo 
+-t ; crea una terminal entre usuario y contenedor para la ejecucion de tareas
+
+
+3. Cómo sería un ficheiro docker-compose para que dous contenedores se comuniquen entre si nunha rede só deles?
+
+version: "n_version"
+services
+    contenedor_A:
+    image: "n_imagen"
+    networks:
+    - "red_compartida"
+
+    contenedor_B:
+    image: "n_imagen"
+    networks:
+    - "red_compartida"
+
+networks:
+  red_compartida:
+    driver: bridge
+    
+    
+    #La configuracion mas basica posible deberia ser esta , en el apartado de servicios debemos indicar los contenedores que se van a utilizar otorgandoles una imagen a cada uno y especificando la red a la que van a pertenecer , posteriormente tambien se debe indicar la red que estara en uso y el metodo de conexion 
+
+
+
+
+4. Qué tes que engadir ó ficheiro anterior para que un contenedor teña unha IP fixa?
+
+
+version: "n_version"
+services
+    contenedor1:
+    image: "n_imagen"
+    networks:
+    - "red_compartida"
+        ipv4_address:0.0.0.0-255.255.255.255(por ejemplo 172.16.0.5)
+    contenedor2:
+    image: "n_imagen"
+    networks:
+    - "red_compartida"
+    ipv4_address:0.0.0.0-255.255.255.255(por ejemplo 172.16.0.6)
+
+networks:
+  red_compartida:
+    driver: bridge
+    config:
+        -subnet:0.0.0.0-255.255.255.0 (por ejemplo 172.16.0.0)
+
+        
+ #En cada contenedor debemos indicar la ip que tendra cada uno de ellos mientras que en el apartado de network la direccion de red principal que sera utilizada, en caso de no querer darle unas ip estaticas a los contenedores siempre podemos usar el parametro -range en network
+ 
+ #Resultado docker-compose up
+ 
+root@christian-VirtualBox:/etc/docker# docker-compose up
+WARN[0000] /etc/docker/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion 
+[+] Running 2/0
+ ✔ Container docker-contenedor2-1  Cr...                                  0.0s 
+ ✔ Container docker-contenedor1-1  Cr...                                  0.0s 
+Attaching to contenedor1-1, contenedor2-1
+
+ 
+
+
+5. Qué comando de consola podo usar para sabe-las ips dos contenedores anteriores?
+
+docker inspect "nombre_contenedor"
+
+docker inspect docker-contenedor1-1 (en mi caso)
+
+
+
+6. Cál é a funcionalidade do apartado "ports" en docker compose?
+
+
+Indicar los puertos a usar a la hora de mapear contenedores con servicios activos , por ejemplo como se hizo en practicas anteriores vinculando un puerto con un servidor apache2
+
+
+7. Para qué serve o rexistro CNAME? Pon un exemplo
+
+
+Alias utilizado a la hora de contactar con un dominio completo por lo general abreviando la ruta 
+
+Ejemplo:
+
+www.google.com  CNAME google.com
+
+
+
+8. Cómo podo facer para que a configuración dun contenedor DNS non se borre se creo outro contenedor?
+
+
+#Aplicando los volumenes de docker donde se guardan los ficheros de configuracion DNS estos ficheros deben reflejar su propia configuracion para que docker permita la ejecucion de estos 
+
+
+Ejemplo:
+
+version: '3'
+services:
+  contenedor1:
+    image: ubuntu
+    networks:
+      mi_red:
+        ipv4_address: 172.16.0.10
+  contenedor2:
+    image: ubuntu
+    networks:
+      mi_red:
+        ipv4_address: 172.16.0.11
+networks:
+  mi_red:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.0.0/24
+
+volumen:
+        -/etc/bind/named.conf
+        -/etc/bind/named.conf.local
+
+
+
+
+
+
+9. Engade unha zoa tendaelectronica.int no teu docker DNS que teña:
+- www á IP 172.16.0.1
+- owncloud sexa un CNAME de www
+- un rexistro de texto có contido "1234ASDF"
+
+Comproba que todo funciona có comando "dig"
+Mostra nos logs que o servicio funciona ben usando a saída da terminal ó levantar o compose ou có comando "docker logs [nomeContenedorOuID]"
+(o apartado 9 realízase na máquina virtual)
+

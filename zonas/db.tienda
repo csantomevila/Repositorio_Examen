@@ -1,0 +1,19 @@
+$TTL 86400
+@    IN    SOA   ns1.tendaelectronica.int. christian.tendaelectronica.int. (
+              2023111501 ; Serial
+              3600       ; Refresh
+              1800       ; Retry
+              1209600    ; Expire
+              86400 )    ; Minimum TTL
+
+     IN    NS    ns1.tendaelectronica.int.
+
+; Registros A
+www                 IN    A     172.16.0.1
+
+; Registros CNAME
+owncloud            IN    CNAME www.tendaelectronica.int.
+
+; Registro TXT
+@                    IN    TXT   "1234ASDF"
+
